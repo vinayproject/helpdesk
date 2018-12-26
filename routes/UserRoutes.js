@@ -1,7 +1,6 @@
 const httputil = require('../utils/HttpUtil');
-const authOperation = require('../operations/authenticationOperations');
 const sessCheck = require('../middlewares/SessionCkeck');
-
+const UserController=require('../controllers/UserControlers')
 
 
 function userRoutes(prefixLink, app) {
@@ -11,11 +10,20 @@ function userRoutes(prefixLink, app) {
      * @param { int }  - user_id
      * @returns {object} - saved request details http response
      */
-    app.post(prefixLink +'/:uid/dashboard/submit', (req, res) => {
+    app.post(prefixLink +'/dashboard/submit', (req, res) => {
         try {
-            
+            let obj = req.body;
+            UserController.save_req(obj,(err,data)=>{
+                if(!err){
+                    res.json(httputil.getSuccess(data))
+                }
+                else{
+                    res.json(httputil.getError(data))
+                }
+            })
+
         } catch (error) {
-            httputil.getError(data);
+            res.json(httputil.getError(data));
         }
     });
 

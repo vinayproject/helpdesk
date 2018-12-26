@@ -1,6 +1,7 @@
 const httputil = require('../utils/HttpUtil');
 const authOperation = require('../controllers/authenticationOperations');
 const sessCheck = require('../middlewares/SessionCkeck');
+const MAIL=require('../utils/mailSender')
 
 
 
@@ -14,41 +15,44 @@ function SignupRoute(prefixLink, app) {
         try {
             let obj = req.body;
             authOperation.generate_password(obj, (err, data) => {
-                if (err === null) {
+                if (!err) {
                     //send the verification_link to email , call the mail function
-                    httputil.getSuccess(data)
+                    MAIL(data,req)
+                    res.json(httputil.getSuccess(data))
                 } else {
-                    httputil.getError(data)
+                    res.json( httputil.getError(data))
                 }
             });
         } catch (error) {
-            httputil.getError(data);
+            res.json(httputil.getError(data));
         }
     });
 
-    app.get(prefixLink + '/verify_link/:email/:link_id', function (req, res) {
+    app.get(prefixLink + '/verify_link/:email', function (req, res) {
         try {
-            let obj = req.params
+            let obj = req;
             authOperation.verify_link(obj, (err, data) => {
-                if (err === null) {
+                if (!err) {
                     //redirect to password generation page
+                    res.json(httputil.getSuccess(data))
                 } else {
-                    httputil.getError(data)
+                      res.json(httputil.getError(data))
                 }
             })
         } catch (error) {
-            httputil.getError(data)
+            console.log(error)
+            res.json(httputil.getError(error))
         }
     });
 
     app.post(prefixLink + '/save_password', function (req, res) {
         let obj = req.body;
-        authOperation.getPassword(obj, (err, data) => {
-            if (err === null) {
+        authOperation.setPassword(obj, (err, data) => {
+            if (!err) {
                 //redirect to dashboard
-                return httputil.getSuccess(data)
+                return res.json(httputil.getSuccess(data))
             } else {
-                return httputil.getError(data)
+                return res.json(httputil.getError(data))
             }
         });
 
@@ -70,10 +74,10 @@ function SignupRoute(prefixLink, app) {
             return httputil.getError(error)
         }
     });
-
-    app.get(prefixLink + '/dashboard', sessCheck, function (req, res) {
-
-    })
 }
+
+process.on("unhandledRejection",function(reason,promise){
+    console.log(reason)
+})
 
 module.exports = SignupRoute;

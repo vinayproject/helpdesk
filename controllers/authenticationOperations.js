@@ -1,55 +1,59 @@
 const dbCon=require('../config/db/mysql-config');
 const QUERY=require('../schema/authentication_schema');
+const MAIL=require('../utils/mailSender')
+
+
 
 
 this.generate_password=async function(obj,callback){
     try {
         let user_name=obj.email
         let data = await dbCon.query(QUERY.GENERATE_PASSWORD,user_name);
-        if(data.length===0 && !data){
-            callback(err,{data:"no such user present"})
+        if(data.length===0 || !data || data===null){
+            callback(true,{data:"no such user present"})
         }else if(data.length===1){
-            return callback(null,data)
+           // MAIL(data);
+            return callback(false,data)
         }
     } catch (error) {
-        return callback(err,error)
+        console.log(error)
+        return callback(true,error)
     }
 }
 
 this.verify_link=async function(obj,callback){
     try {
-        let uname=obj.email;
-        let id=obj.link_id;
+        let uname=obj.param('email');
         let data=await dbCon.query(QUERY.VERIFY_LINK,uname);
         if(data.length===0){
-            callback(err,data);
+            callback(true,data);
         }else if(data.length===1){
-           let _id=data[0].link_id;
-           if(id===_id){
+           let uname=data[0].user_name;
+           if(uname===data[0].user_name){
                return callback(null,data);
            }else{
-               return callback(err,{data:'id missmatch'});
+               return callback(true,{data:'id missmatch'});
            }
         }else{
-            return callback(err,null);
+            return callback(true,null);
         }
     } catch (error) {
-        return callback(err,null);
+        return callback(true,null);
     }
 }
 
-this.getPassword=async (obj,callback)=>{
+this.setPassword=async (obj,callback)=>{
     try {
-        let email=obj.email;
+        let user_name=obj.email;
         let password=obj.password;
-        let data=await dbCon.query(QUERY.SAVE_PASSWORD,[password,email]);
-        if(data[0].affectedrow===1){
-            return callback(null,data)
+        let data=await dbCon.query(QUERY.SAVE_PASSWORD,[password,user_name]);
+        if(data.affectedRows===1){
+            return callback(false,data)
         }else{
-            return callback(err,null)
+            return callback(true,null)
         }
     } catch (error) {
-        return callback(err,error)
+        return callback(true,error)
     }
 }
 
@@ -75,5 +79,7 @@ this.Login=async function (obj,callback){
         return callback(true,error)
     }
 }
+
+
 
 module.exports=this;

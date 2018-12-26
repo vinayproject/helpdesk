@@ -30,6 +30,10 @@ const dev = {
         s3ProcessedFolder: "/processed/",
         s3ErrorFolder:"/error/",
         s3SchedulerTime: 1000 *60
+    },
+    email:{
+        user_name:"omkar.vinay0404@gmail.com",
+        password:"9964700208"
     }
 }
 

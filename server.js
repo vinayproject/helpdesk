@@ -7,10 +7,10 @@ const cors=require('cors');
 
 
 
-//var mail=require('./services/receive-mails')
 
 var adminRoutes=require('./routes/adminRoutes');
 var AuthenticationRoutes=require('./routes/AuthenticationRoutes');
+const UserRoutes=require('./routes/UserRoutes');
 
 
 
@@ -33,7 +33,7 @@ app.use(bodyparser.json())
 
 adminRoutes('/',app)
 AuthenticationRoutes('/auth',app)
-
+UserRoutes('/user',app)
 
 
 
